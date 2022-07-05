@@ -1,83 +1,114 @@
-import axios from "axios";
-import { useState, useEffect, StyleSheet } from "react";
-// import styles from "./Component.module.css";
+import Card from "@mui/material/Card";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CardActions from "@mui/material/CardActions";
+import Typography from "@mui/material/Typography";
+import * as React from "react";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+
 const styles = {
   title: {
-    fontSize: "18px",
-    color: "blue",
     textAlign: "left",
+    color: "white",
   },
   body: {
     fontSize: "18px",
     color: "white",
     textAlign: "left",
-    border: "1px solid",
-    borderColor: "blue",
     padding: "5px",
-  },
-  bodycontent: {
-    border: "1px solid",
-    borderColor: "red",
   },
   img: {
     height: "500px",
     margin: "10px",
+    boxShadow: "0px 3px 10px 3px  red",
+  },
+  creator: {
+    overflowX: "scroll",
+    maxheight: "300px",
+    position: "relative",
+    height: "200px",
+    display: "flex",
+    flexDirection: "column",
+  },
+  accordianDetail: {
+    overflowY: "scroll",
+    position: "relative",
+    height: "150px",
+    display: "flex",
+    flexDirection: "column",
+  },
+  card: {
+    boxShadow: "0px 0px 6px 3px  blue",
+    margin: "10px",
+    padding: "10px",
+    display: "inline-block",
+    backgroundColor: "black",
+    width: "400px",
   },
 };
-const ComicDetails = ({ comicName, comicURL }) => {
-  const [comicDetail, setComicDetail] = useState("");
-  useEffect(() => {
-    {
-      const url =
-        comicURL +
-        "?ts=100&apikey=57c07708bb14e463126483f2889b35eb&hash=c41cec366ac6c477f37e5a15e5717be2";
-
-      axios
-        .get(url)
-        .then((response) => {
-          console.log("res: ", response);
-          setComicDetail(response.data.data.results[0]);
-        })
-        .catch((error) => {
-          console.log("Error marvel: ", error);
-        });
-    }
-  }, []);
-
-  return <ComicCard comicDetail={comicDetail} />;
+const ComicDetails = ({ comicURL }) => {
+  return <ComicCard comicDetail={{ comicDetail: comicURL }} />;
 };
 
 const ComicCard = ({ comicDetail }) => {
-  //   console.log("test 2: ", comicDetail);
-  let comicCreator = comicDetail.creators.items;
-  let comicSeriesName = comicDetail.series.name;
-  let comicTitle = comicDetail.title;
+  let comicSeriesName = comicDetail.comicDetail.series.name;
+  let comicCreator = comicDetail.comicDetail.creators.items;
+  let comicSaleDate = comicDetail.comicDetail.dates[0].date.split("T")[0];
+  let comicTitle = comicDetail.comicDetail.title;
+  let comicImage = comicDetail.comicDetail.thumbnail.path + ".jpg";
+  let comicDescription = comicDetail.comicDetail.description;
 
-  let comicImage = comicDetail.thumbnail.path + ".jpg";
-  console.log(comicImage);
   return (
-    <div style={{ margin: "20px" }}>
-      <h1>Comic Details</h1>
+    <div>
       <div
         style={{
-          flexDirection: "row",
           display: "flex",
           justifyContent: "center",
         }}
       >
         <img src={comicImage} alt="Logo" style={styles.img} />
-        <div style={styles.title}>
-          <div style={styles.body}>
-            <h2>{comicTitle}</h2>
-            <h5>Series: {comicSeriesName}</h5>
-            {comicCreator.map((comicCreator, keycomicCreator) => (
-              <div style={styles.bodycontent}>
-                <h5>Creator: {comicCreator.name}</h5>
-                <h5>Role: {comicCreator.role}</h5>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Card
+          variant="outlined"
+          sx={{ maxWidth: "500px", maxHeight: "500px" }}
+          style={styles.card}
+        >
+          <CardActions disableSpacing>
+            <div style={styles.title}>
+              <Typography style={{ color: "white" }}>
+                <h2>{comicTitle}</h2>
+                <h5>Series: {comicSeriesName}</h5>
+                <h5>On Sale Date: {comicSaleDate}</h5>
+                <h5>Description: </h5>
+                <h5>{comicDescription}</h5>
+              </Typography>
+              <Accordion style={{ marginBottom: "10px" }}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1a-content"
+                >
+                  <Typography>More Info</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <div style={styles.accordianDetail}>
+                    <h3>Creator: </h3>
+                    {comicCreator &&
+                      comicCreator.map((comicCreator, keycomicCreator) => {
+                        let creatorRole =
+                          comicCreator.role.charAt(0).toUpperCase() +
+                          comicCreator.role.slice(1);
+                        return (
+                          <div>
+                            {creatorRole}: {comicCreator.name}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          </CardActions>
+        </Card>
       </div>
     </div>
   );

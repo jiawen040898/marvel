@@ -5,18 +5,58 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import axios from "axios";
-import { useState, useEffect } from "react";
-// import { Link } from "@mui/material";
-import { Link, Router } from "react-router-dom";
-import ComicScreen from "./Comic";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import TestScreen from "./Test";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Tab, Tabs } from "@mui/material";
+import "./App.css";
+import { useSelector, useDispatch } from "react-redux";
+import { setData } from "./reducers";
+
+const styles = {
+  title: {
+    color: "red",
+    padding: "10px",
+    margin: "auto",
+    textShadow: "2px 1px 3px white",
+  },
+  tab: {
+    justifyItems: "center",
+    cursor: "pointer",
+  },
+  tabs: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  card: {
+    border: "1px solid",
+    boxShadow: "0px 0px 6px 3px  grey",
+    margin: "10px",
+    width: "300px",
+    height: "315px",
+    backgroundColor: "black",
+  },
+  typography: {
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+  },
+};
 
 function CharacterCard() {
-  const navigate = useNavigate();
+  const characters = useSelector((state) => state.marvel.data);
+  const dispatch = useDispatch();
 
-  const [characters, setCharactersList] = useState({});
-  console.log("cha:", characters[0]);
+  const navigate = useNavigate();
+  const homeScreen = () => {
+    navigate("/home");
+  };
+
+  const handleHeroDetails = () => {
+    navigate("/comic");
+  };
+  const characterScreen = () => {
+    navigate("/characterview");
+  };
   useEffect(() => {
     getCharacters();
   }, []);
@@ -28,10 +68,8 @@ function CharacterCard() {
     axios
       .get(url)
       .then((response) => {
-        console.log("haha response", response);
-        console.log("characters", response.data.data.results);
         if (response != null) {
-          setCharactersList(response.data.data.results);
+          dispatch(setData(response.data.data.results));
         }
       })
       .catch((error) => {
@@ -39,72 +77,65 @@ function CharacterCard() {
       });
   };
 
-  const handleHeroDetails = () => {
-    navigate("/comic");
-  };
-
   return (
     <div>
-      <h1
-        style={{
-          color: "red",
-          padding: "10px",
-          margin: "auto",
-          textShadow: "2px 1px 3px white",
-        }}
-      >
-        MARVEL HEROES
-      </h1>
-      {characters.map((characters, keyCharacters) => {
-        let imagePath = characters.thumbnail.path + ".jpg";
-        console.log("imagePath: ", imagePath);
-        return (
-          <div
-            style={{
-              justifyContent: "center",
-              display: "inline-block",
-            }}
+      <div>
+        <header className="header">
+          <Tabs
+            className="tab"
+            aria-label="basic tabs example"
+            style={styles.tab}
           >
-            <Card
-              sx={{ maxWidth: 345 }}
-              variant="outlined"
+            <h1>MARVEL</h1>
+            <Tab label="HOME" onClick={homeScreen} style={styles.tabs} />
+            <Tab label="HEROES" onClick={characterScreen} style={styles.tabs} />
+          </Tabs>
+        </header>
+      </div>
+      {characters &&
+        characters.map((characters, keyCharacters) => {
+          let imagePath = characters.thumbnail.path + ".jpg";
+          return (
+            <div
               style={{
-                border: "1px solid",
-                boxShadow: "0px 0px 6px 3px  grey",
-                margin: "10px",
-                width: "300px",
-                height: "315px",
+                justifyContent: "center",
+                display: "inline-block",
               }}
             >
-              <CardMedia
-                component="img"
-                height="210"
-                image={imagePath}
-                alt="heroes image"
-              />
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h7"
-                  component="div"
-                  style={{ fontWeight: "bold" }}
-                >
-                  {characters.name}
-                </Typography>
-              </CardContent>
-              <CardActions style={{ justifyContent: "right" }}>
-                <Button
-                  onClick={handleHeroDetails}
-                  size="small"
-                  style={{ fontWeight: "bold" }}
-                >
-                  DETAILS
-                </Button>
-              </CardActions>
-            </Card>
-          </div>
-        );
-      })}
+              <Card
+                sx={{ maxWidth: 345 }}
+                variant="outlined"
+                style={styles.card}
+              >
+                <CardMedia
+                  component="img"
+                  height="210"
+                  image={imagePath}
+                  alt="heroes image"
+                />
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant="h7"
+                    component="div"
+                    style={styles.typography}
+                  >
+                    {characters.name}
+                  </Typography>
+                </CardContent>
+                <CardActions style={{ justifyContent: "right" }}>
+                  <Button
+                    onClick={handleHeroDetails}
+                    size="small"
+                    style={{ fontWeight: "bold" }}
+                  >
+                    DETAILS
+                  </Button>
+                </CardActions>
+              </Card>
+            </div>
+          );
+        })}
     </div>
   );
 }
