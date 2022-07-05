@@ -42,6 +42,12 @@ function ComicScreen() {
     HeroComic();
   }, []);
 
+  useEffect(() => {
+    if (comicsDetailsData.length == 0 && heroComic.length > 0) {
+      getComisData();
+    }
+  }, [heroComic]);
+
   const HeroComic = () => {
     dispatch(clearComicsData());
 
@@ -51,7 +57,6 @@ function ComicScreen() {
       .get(url)
       .then((response) => {
         dispatch(setHeroComicData(response.data.data.results[0].comics.items));
-        getComisData();
       })
       .catch((error) => {
         console.log("Error marvel: ", error);
@@ -63,8 +68,6 @@ function ComicScreen() {
       let url =
         item.resourceURI +
         "?ts=100&apikey=57c07708bb14e463126483f2889b35eb&hash=c41cec366ac6c477f37e5a15e5717be2";
-
-      console.log("index " + index + " ", url);
       axios
         .get(url)
         .then((response) => {
